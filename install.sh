@@ -4,7 +4,7 @@ clear
 echo ""
 echo "=========================================================================="
 echo "|                                                                        |"
-echo "|    full-stack-proxy-nginx-grav-for-everyone-with-docker-compose     |"
+echo "|      full-stack-proxy-nginx-grav-for-everyone-with-docker-compose      |"
 echo "|                        by Erdal ALTIN                                  |"
 echo "|                                                                        |"
 echo "=========================================================================="
