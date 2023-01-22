@@ -15,6 +15,9 @@ services:
             - type: bind
               source: ./php-fpm/php-fpm.d/z-www.conf
               target: '${PHP_INI_DIR_PREFIX}/php-fpm.d/z-www.conf'
+            - type: bind
+              source: ./packagecheck.sh
+              target: '/tmp/packagecheck.sh'
         hostname: grav
         restart: unless-stopped
         ports:
@@ -32,9 +35,9 @@ services:
         labels:            
             - 'docker-volume-backup.stop-during-backup=true'
         command: >
-            bash -c "apt-get -y update && apt-get install -y --no-install-recommends unzip libfreetype6-dev libjpeg62-turbo-dev libpng-dev libyaml-dev libzip4 libzip-dev zlib1g-dev libicu-dev libxml2-dev g++ git cron vim && rm -rf /var/lib/apt/lists/* && 
-            docker-php-ext-configure gd --with-freetype --with-jpeg && docker-php-ext-install -j$(nproc) gd intl opcache zip ctype dom json session simplexml && if pecl install -p -- redis; then pecl install -o -f redis && rm -rf /tmp/pear && docker-php-ext-enable redis; fi && if pecl install -p -- yaml; then pecl install -o -f yaml && rm -rf /tmp/pear && docker-php-ext-enable yaml; fi && 
-            curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer; if [ -f \"${WEBSERVER_DOC_ROOT}/index.php\" ]; then composer update --working-dir=${WEBSERVER_DOC_ROOT}; else rm -f ${WEBSERVER_DOC_ROOT}/README.md && composer create-project getgrav/grav ${WEBSERVER_DOC_ROOT} && bin/gpm install antimatter admin && chown www-data:www-data -R ${WEBSERVER_DOC_ROOT}; fi; grep -qe 'date.timezone = ${LOCAL_TIMEZONE}' ${PHP_INI_DIR_PREFIX}/php/conf.d/security.ini || echo 'date.timezone = ${LOCAL_TIMEZONE}' >> ${PHP_INI_DIR_PREFIX}/php/conf.d/security.ini; php-fpm"
+            bash -c "apt-get -y update && sh /tmp/packagecheck.sh 'unzip libyaml-dev g++ git cron vim' && curl -sSL https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions -o - | sh -s gd intl opcache zip ctype dom json session simplexml && if pecl install -p -- redis; then pecl install -o -f redis && rm -rf /tmp/pear && docker-php-ext-enable redis; fi && if pecl install -p -- yaml; then pecl install -o -f yaml && rm -rf /tmp/pear && docker-php-ext-enable yaml; fi && 
+            curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer; if [ -f \"${WEBSERVER_DOC_ROOT}/index.php\" ]; then composer update --working-dir=${WEBSERVER_DOC_ROOT}; else rm -f ${WEBSERVER_DOC_ROOT}/README.md && composer create-project getgrav/grav ${WEBSERVER_DOC_ROOT} && bin/gpm install antimatter admin && chown www-data:www-data -R ${WEBSERVER_DOC_ROOT}; fi; 
+            grep -qe 'date.timezone = ${LOCAL_TIMEZONE}' ${PHP_INI_DIR_PREFIX}/php/conf.d/security.ini || echo 'date.timezone = ${LOCAL_TIMEZONE}' >> ${PHP_INI_DIR_PREFIX}/php/conf.d/security.ini; php-fpm"
 
     webserver:
         depends_on:
