@@ -3,7 +3,7 @@ version: '3.7'
 services:
 
     grav:
-        image: '${PHP_IMAGE_NAME}'
+        image: ${PHP_IMAGE_NAME}
         container_name: grav
         networks:
             - backend
@@ -25,14 +25,14 @@ services:
         links:
             - redis
         healthcheck:
-            test: ["CMD-SHELL", "curl -fk https://${DOMAIN_NAME} || exit 1"]
-            interval: 10s
+            test: ["CMD-SHELL", "/bin/pidof php-fpm > /dev/null || exit 1"]
+            interval: 5s
             timeout: 5s
-            retries: 9
+            retries: 50
             start_period: 100s
         environment:
             TZ: '${LOCAL_TIMEZONE}'
-        labels:            
+        labels:
             - 'docker-volume-backup.stop-during-backup=true'
         command: >
             bash -c "apt-get -y update && sh /tmp/packagecheck.sh 'unzip libyaml-dev g++ git cron vim' && curl -sSL https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions -o - | sh -s gd intl opcache zip ctype dom json session simplexml && if pecl install -p -- redis; then pecl install -o -f redis && rm -rf /tmp/pear && docker-php-ext-enable redis; fi && if pecl install -p -- yaml; then pecl install -o -f yaml && rm -rf /tmp/pear && docker-php-ext-enable yaml; fi && 
@@ -41,8 +41,9 @@ services:
 
     webserver:
         depends_on:
-            - grav
-        image: 'httpd:latest'
+            grav:
+                condition: service_healthy
+        image: httpd:latest
         container_name: webserver
         networks:
             - backend            
@@ -50,7 +51,7 @@ services:
             - 'html:${WEBSERVER_DOC_ROOT}'
             - type: bind
               source: ./webserver
-              target: '${HTTPD_PREFIX}/conf'            
+              target: '${HTTPD_PREFIX}/conf'
         hostname: webserver
         restart: unless-stopped
         ports:
@@ -64,14 +65,14 @@ services:
     certbot:
         depends_on:
             - proxy
-        image: certbot/certbot
+        image: certbot/certbot:latest
         container_name: certbot
         networks:
             - backend
         volumes:
             - 'certbot-etc:${LETSENCRYPT_CONF_PREFIX}'
             - 'certbot-var:/var/lib/letsencrypt'
-            - '/tmp/acme-challenge:/tmp/acme-challenge'                        
+            - '/tmp/acme-challenge:/tmp/acme-challenge'
         restart: unless-stopped        
         environment:
             TZ: '${LOCAL_TIMEZONE}'
@@ -115,7 +116,7 @@ services:
         command: bash -c "/docker-entrypoint.sh nginx -v; sh /tmp/ssl-proxyconf.sh '${DOMAIN_NAME}' '${LETSENCRYPT_CONF_PREFIX}' '${PROXY_PREFIX}'"
     
     redis:
-        image: 'redis:latest'
+        image: redis:latest
         container_name: redis
         networks:
             - backend
@@ -134,7 +135,7 @@ services:
             ALLOW_EMPTY_PASSWORD: 'yes'
             TZ: '${LOCAL_TIMEZONE}'
         command: "redis-server ${REDIS_CONF_PREFIX}/redis/redis.conf"
-    
+
     backup:
         image: offen/docker-volume-backup:latest
         container_name: backup
@@ -169,6 +170,6 @@ volumes:
     dtredis:
         name: redis-data
     certbot-etc:
-        external: true        
+        external: true
     certbot-var:
         name: certbot-var
