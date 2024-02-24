@@ -61,7 +61,7 @@ services:
         environment:
             TZ: '${LOCAL_TIMEZONE}'
         command: bash -c "sed -i 's/example.com/${DOMAIN_NAME}/g' ${HTTPD_PREFIX}/conf/extra/httpd-vhosts.conf && httpd -t; httpd-foreground"
-    
+
     certbot:
         depends_on:
             - proxy
@@ -73,7 +73,7 @@ services:
             - 'certbot-etc:${LETSENCRYPT_CONF_PREFIX}'
             - 'certbot-var:/var/lib/letsencrypt'
             - '/tmp/acme-challenge:/tmp/acme-challenge'
-        restart: unless-stopped        
+        restart: unless-stopped
         environment:
             TZ: '${LOCAL_TIMEZONE}'
         entrypoint: /bin/sh -c "certbot certonly --webroot --webroot-path /tmp/acme-challenge --rsa-key-size 4096 --non-interactive --agree-tos --no-eff-email --force-renewal --email ${LETSENCRYPT_EMAIL} -d ${DOMAIN_NAME} -d www.${DOMAIN_NAME}; 
