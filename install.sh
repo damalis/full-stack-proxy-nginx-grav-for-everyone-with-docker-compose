@@ -18,7 +18,6 @@ do
 		if [ "$i" == "apk" ]
 		then
 			lpms=$i
-			sudo apk add --no-cache --upgrade grep
 			break
 		elif [ "$i" == "dnf" ] && ([[ $(grep -Pow 'ID=\K[^;]*' /etc/os-release | tr -d '"') == "fedora" ]] || (([[ $(grep -Pow 'ID=\K[^;]*' /etc/os-release | tr -d '"') != "centos" ]] && [[ $(grep -Pow 'ID_LIKE=\K[^;]*' /etc/os-release | tr -d '"') == *"fedora"* ]]) || ([[ $(grep -Pow 'ID_LIKE=\K[^;]*' /etc/os-release | tr -d '"') == *"rhel"* ]] && [ $(sudo uname -m) == "s390x" ])))
 		then
@@ -45,15 +44,6 @@ if [ -z $lpms ]; then
 	echo "could not be detected package management system"
 	echo ""
 	exit 0
-fi
-
-##########
-# set varnish version
-##########
-varnish_version="stable"
-if ([[ $(grep -Pow 'VERSION_ID=\K[^;]*' /etc/os-release | tr -d '"') == 9* ]] && [ $(grep -Pow 'ID=\K[^;]*' /etc/os-release | tr -d '"') == "centos" ]) || [ $(grep -Pow 'ID=\K[^;]*' /etc/os-release | tr -d '"') == "fedora" ]
-then
-	varnish_version="latest"
 fi
 
 ##########
@@ -231,13 +221,13 @@ echo "======================================================================="
 echo ""
 echo ""
 echo "======================================================================="
-echo "| Installing Docker Compose v2.23.3..."
+echo "| Installing Docker Compose v2.27.2..."
 echo "======================================================================="
 echo ""
 sleep 2
 
 sudo mkdir -p /usr/local/lib/docker/cli-plugins
-sudo curl -SL "https://github.com/docker/compose/releases/download/v2.23.3/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/lib/docker/cli-plugins/docker-compose
+sudo curl -SL "https://github.com/docker/compose/releases/download/v2.27.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/lib/docker/cli-plugins/docker-compose
 sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
 
 echo ""
@@ -261,6 +251,7 @@ echo ""
 echo "Done ✓"
 echo "======================================================================="
 
+clear
 ##########
 # Setup project variables
 ##########
