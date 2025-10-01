@@ -35,7 +35,7 @@ services:
         command: >
             bash -c "apt-get -y update && sh /tmp/packagecheck.sh 'zip unzip libyaml-dev g++ git cron vim' && curl -sSL https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions -o - | sh -s gd intl opcache zip ctype dom json session simplexml redis yaml exif && 
             curl -sS https://getcomposer.org/installer | php && mv composer.phar /usr/local/bin/composer; if [ -f \"${WEBSERVER_DOC_ROOT}/index.php\" ]; then composer update --working-dir=${WEBSERVER_DOC_ROOT}; else rm -f ${WEBSERVER_DOC_ROOT}/README.md && composer create-project getgrav/grav ${WEBSERVER_DOC_ROOT} && bin/gpm install antimatter admin && chown www-data:www-data -R ${WEBSERVER_DOC_ROOT}; fi; 
-            grep -qe 'date.timezone = ${LOCAL_TIMEZONE}' ${PHP_INI_DIR_PREFIX}/php/conf.d/security.ini || echo 'date.timezone = ${LOCAL_TIMEZONE}' >> ${PHP_INI_DIR_PREFIX}/php/conf.d/security.ini; php-fpm"
+            grep -qxF 'date.timezone = ${LOCAL_TIMEZONE}' ${PHP_INI_DIR_PREFIX}/php/conf.d/security.ini || echo 'date.timezone = ${LOCAL_TIMEZONE}' >> ${PHP_INI_DIR_PREFIX}/php/conf.d/security.ini; php-fpm"
 
     webserver:
         depends_on:
