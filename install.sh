@@ -483,8 +483,10 @@ esac
 
 sudo \cp env.example .env
 
-sed -i 's/example.com/'$domain_name'/' .envsed -i 's/email@domain.com/'$email'/' .env
-sed -i "s/ssl_snippet/$ssl_snippet/" .envsed -i "s@directory_path@$(pwd)@" .env
+sed -i 's/example.com/'$domain_name'/' .env
+sed -i 's/email@domain.com/'$email'/' .env
+sed -i "s/ssl_snippet/$ssl_snippet/" .env
+sed -i "s@directory_path@$(pwd)@" .env
 sed -i 's/local_timezone/'$local_timezone'/' .env
 
 if [ -x "$(command -v docker)" ] && [ "$(docker compose version)" ]; then
